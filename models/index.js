@@ -26,23 +26,11 @@ db.Sequelize = Sequelize;
 
 db.Users = require('./user')(sequelize, Sequelize);
 db.Message = require('./message')(sequelize, Sequelize);
-db.Group = require('./group')(sequelize, Sequelize);
-db.GroupMembers = require('./groupMember')(sequelize, Sequelize);
-
 
 db.Users.hasMany(db.Message, { as: 'sentMessage', foreignKey: 'sender_id' });
 db.Users.hasMany(db.Message, { as: 'recievedMessage', foreignKey: 'reciever_id' });
 
 db.Message.belongsTo(db.Users, { as: 'sender', foreignKey: 'sender_id' });
 db.Message.belongsTo(db.Users, { as: 'reciever', foreignKey: 'reciever_id' })
-
-db.GroupMembers.belongsTo(db.Users, { foreignKey: 'user_id' });
-
-db.Group.hasMany(db.GroupMembers, { foreignKey: 'group_id' })
-db.GroupMembers.belongsTo(db.Group, { foreignKey: 'group_id' });
-
-
-db.Group.hasMany(db.Message, { as: 'messages', foreignKey: 'group_id' });
-db.Message.belongsTo(db.Group, { foreignKey: 'group_id' })
 
 module.exports = db;
