@@ -1,0 +1,13 @@
+{
+  "tasks": {
+    "dev": "deno run -A --watch server.ts"
+  },
+  "imports": {
+    "@felix/bcrypt": "jsr:@felix/bcrypt@^1.0.5",
+    "@std/assert": "jsr:@std/assert@1",
+    "express": "npm:express@^4.21.2",
+    "jsonwebtoken": "npm:jsonwebtoken@^9.0.2",
+    "mongoose": "npm:mongoose@^8.9.5",
+    "socket.io": "npm:socket.io@^4.8.1"
+  }
+}
