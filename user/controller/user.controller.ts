@@ -22,7 +22,6 @@ export const create = async (req: Request, res: Response) => {
     }
 };
 
-
 export const userList = async (_req: Request, res: Response)=>{
     const users = await User.find();
     res.status(200).send({
@@ -54,6 +53,6 @@ export const login = async (req: Request, res: Response) => {
 
     const token = jwt.sign({user}, secret, { expiresIn: "2h" })
     
-    return res.status(200).send({ success: true, message: "Logged in successfully", token })
+    return res.status(200).send({ success: true, message: "Logged in successfully", user, token })
 
 }
