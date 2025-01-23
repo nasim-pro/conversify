@@ -2,7 +2,8 @@ import express, { Request, Response } from "express";
 import process from "node:process";
 import { createServer } from "node:http";
 import { Server } from "socket.io";
-import { userRouter } from "./user/routes/user.routes.ts";
+// import { userRouter } from "./user/routes/user.routes.ts";
+import { allRoute } from "./all-routes.ts";
 import { connectToDb } from "./db-config/db.config.ts";
 import { Message } from "./message/message.schema.ts";
 
@@ -14,7 +15,7 @@ const server = createServer(app);
 const io = new Server(server, {
   cors: {
     origin: ["http://localhost:3000"], // Explicitly allow these origins
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   },
@@ -24,24 +25,18 @@ app.use((req: Request, res: Response, next: () => void) => {
   res.header("Access-Control-Allow-Origin", "*"); // Allow all origins or specify
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
   res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-
   // Handle preflight (OPTIONS) request
   if (req.method === "OPTIONS") {
-    return res.sendStatus(204); // No Content
+    return res.sendStatus(204); 
   }
-
   next();
 });
 
 app.use(express.json());
-app.use("/api", userRouter);
-// app.use('/', (_req: Request, res: Response) => {
-//     return res.status(200).send({ name: "Conversify", status: "Running", success: true });
-// });
+app.use("/api", allRoute);
 
 io.on("connection", (socket) => {
-  console.log(`User connected: ${socket.id}`);
-
+ // console.log(`User connected: ${socket.id}`);
   // Join user-specific room
   socket.on("join_room", (userId) => {
     socket.join(userId);
@@ -65,7 +60,4 @@ io.on("connection", (socket) => {
   });
 });
 
-server.listen(
-  PORT,
-  () => console.log(`Conversify server is running on port ${PORT}`),
-);
+server.listen(PORT, () => console.log(`Conversify server is running on port ${PORT}`));
