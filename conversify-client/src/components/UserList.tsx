@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from 'next/navigation'
 import axios from "axios";
 
 interface User {
@@ -17,7 +18,7 @@ const UserList = ({ onSelectUser }: Props) => {
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-
+    const router = useRouter();
     useEffect(() => {
         const fetchUsers = async () => {
             try {
@@ -37,8 +38,11 @@ const UserList = ({ onSelectUser }: Props) => {
                 const filteredUsers = response.data.data.filter((user: User) => user._id !== loggedInUser._id);
                 setUsers(filteredUsers);
             } catch (err) {
-                setError("Failed to fetch users. Please try again later.");
                 console.error("Error fetching users:", err);
+                if (err?.status == "401"){
+                    router.push('/login')
+                }
+                setError("Failed to fetch users. Please try again later.");
             } finally {
                 setLoading(false);
             }
