@@ -3,7 +3,7 @@
 import { CSSProperties, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import UserList from "../components/UserList";
-import ChatBox from "../components/ChatBox";
+import Communication from "../components/Communication";
 
 const HomePage = () => {
   const router = useRouter();
@@ -38,7 +38,7 @@ const HomePage = () => {
       {/* Right Column: Chat Box */}
       <div style={{ flex: 2, padding: "10px" }}>
         {selectedUser && (
-          <ChatBox currentUser={currentUser} selectedUser={selectedUser} />
+          <Communication currentUser={currentUser} selectedUser={selectedUser} />
         )}
       </div>
     </div>
@@ -55,5 +55,6 @@ const styles: { [key: string]: CSSProperties } = {
     backgroundSize: "cover",
   },
 };
+
 // #edb601
 export default HomePage;
