@@ -37,7 +37,7 @@ export const login = async (req: Request, res: Response) => {
         return res.status(400).send({ success: false, message: "Email and password is required" })
     }
     const user = await User.findOne({email});
-    console.log("user", user);
+    // console.log("user", user);
     
     if (!user) {
         return res.status(404).send({ success: false, message: "User not found" })
