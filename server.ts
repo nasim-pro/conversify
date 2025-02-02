@@ -8,13 +8,13 @@ import { connectToDb } from "./db-config/db.config.ts";
 import { Message } from "./message/message.schema.ts";
 
 connectToDb();
-
+const users = {};
 const PORT = process.env.PORT || 2025;
 const app = express();
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:3000"], // Explicitly allow these origins
+    origin: ["http://localhost:3000",], // Explicitly allow these origins
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
@@ -39,6 +39,7 @@ io.on("connection", (socket) => {
  // console.log(`User connected: ${socket.id}`);
   // Join user-specific room
   socket.on("join_room", (userId) => {
+    users[userId] = socket.id; // Store socket ID
     socket.join(userId);
     console.log(`User ${userId} joined their room`);
   });
@@ -55,9 +56,64 @@ io.on("connection", (socket) => {
     });
   });
 
+  // Handle WebRTC signaling for video/audio calls
+  socket.on("offer", (data) => {
+    const { to, offer } = data;
+    console.log("offer recived be", to, offer);
+    
+    // const receiverSocketId = users[to];
+    // if (receiverSocketId) {
+    //   io.to(receiverSocketId).emit("offer", { from: socket.id, offer });
+    // }
+    if (users[to]) {
+      io.to(users[to]).emit("offer", { from: socket.id, offer });
+    }
+  });
+
+  socket.on("answer", (data) => {
+    const { to, answer } = data;
+    console.log("to, answer", to, answer);
+    
+    const receiverSocketId = users[to];
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("answer", { from: socket.id, answer });
+    }
+  });
+
+  socket.on("candidate", (data) => {
+    const { to, candidate } = data;
+    const receiverSocketId = users[to];
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("candidate", { from: socket.id, candidate });
+    }
+  });
+
+  // Notify when a user disconnects
+  // socket.on("disconnect", () => {
+  //   console.log(`User disconnected: ${socket.id}`);
+  //   for (const [userId, socketId] of Object.entries(users)) {
+  //     if (socketId === socket.id) {
+  //       delete users[userId];
+  //       break;
+  //     }
+  //   }
+  // });
+
   socket.on("disconnect", () => {
     console.log(`User disconnected: ${socket.id}`);
+    for (const [userId, socketId] of Object.entries(users)) {
+      if (socketId === socket.id) {
+        delete users[userId]; // Remove user entry on disconnect
+        break;
+      }
+    }
   });
+
 });
+
+  // socket.on("disconnect", () => {
+  //   console.log(`User disconnected: ${socket.id}`);
+  // });
+// });
 
 server.listen(PORT, () => console.log(`Conversify server is running on port ${PORT}`));
