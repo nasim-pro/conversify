@@ -91,6 +91,8 @@ const AudioCall = ({ currentUser, selectedUser }) => {
      * Effect Hook: Handles incoming socket events for WebRTC signaling
      */
     useEffect(() => {
+        //Join user room
+        socket.emit("join_room", currentUser._id);
         /**
          * Handles incoming SDP offer from the caller
          * - Creates a new peer connection if not already established
@@ -171,7 +173,9 @@ const AudioCall = ({ currentUser, selectedUser }) => {
             {/* Audio elements for local and remote streams */}
             <div>
                 <h4>Audio Call</h4>
+                local
                 <audio ref={localAudioRef} autoPlay controls style={{ width: "100%", marginBottom: "10px" }} />
+                remote
                 <audio ref={remoteAudioRef} autoPlay controls style={{ width: "100%" }} />
             </div>
         </div>
