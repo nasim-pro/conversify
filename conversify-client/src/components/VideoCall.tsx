@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import socket from "../utils/socket";
 
 const VideoCall = ({ currentUser, selectedUser }) => {
@@ -14,7 +14,49 @@ const VideoCall = ({ currentUser, selectedUser }) => {
         ],
     };
 
-    const startCall = async () => {
+    useEffect(() => {
+        // First join room
+        socket.emit("join_room", currentUser._id);
+        // wait for offer event
+        socket.on("offer", async ({ offer, from }) => {
+            console.log("incoming offer", offer, "from", from);
+            
+            if (!peerConnection.current) startPeerConnection();
+            await peerConnection.current.setRemoteDescription(new RTCSessionDescription(offer));
+
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            if (localVideoRef.current) localVideoRef.current.srcObject = stream;
+
+            stream.getTracks().forEach((track) => {
+                peerConnection.current?.addTrack(track, stream);
+            });
+
+            const answer = await peerConnection.current.createAnswer();
+            await peerConnection.current.setLocalDescription(answer);
+
+            socket.emit("answer", { answer, to: from });
+        });
+
+        socket.on("answer", async ({ answer }) => {
+            if (peerConnection.current) {
+                await peerConnection.current.setRemoteDescription(new RTCSessionDescription(answer));
+            }
+        });
+
+        socket.on("candidate", ({ candidate }) => {
+            if (peerConnection.current) {
+                peerConnection.current.addIceCandidate(new RTCIceCandidate(candidate));
+            }
+        });
+
+        return () => {
+            socket.off("offer");
+            socket.off("answer");
+            socket.off("candidate");
+        };
+    }, []);
+
+    const startPeerConnection = () => {
         peerConnection.current = new RTCPeerConnection(servers);
 
         peerConnection.current.onicecandidate = (event) => {
@@ -28,6 +70,10 @@ const VideoCall = ({ currentUser, selectedUser }) => {
                 remoteVideoRef.current.srcObject = event.streams[0];
             }
         };
+    };
+
+    const startCall = async () => {
+        startPeerConnection();
 
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
@@ -51,9 +97,20 @@ const VideoCall = ({ currentUser, selectedUser }) => {
             peerConnection.current.close();
             peerConnection.current = null;
         }
-        if (localVideoRef.current) localVideoRef.current.srcObject = null;
-        if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null;
+
+        // Stop the camera/microphone
+        if (localVideoRef.current?.srcObject) {
+            localVideoRef.current.srcObject.getTracks().forEach(track => track.stop());
+            localVideoRef.current.srcObject = null;
+        }
+
+        if (remoteVideoRef.current?.srcObject) {
+            remoteVideoRef.current.srcObject = null;
+        }
+
+        socket.emit("endCall", { to: selectedUser._id });
     };
+
 
     return (
         <div>
