@@ -59,12 +59,14 @@ io.on("connection", (socket) => {
   // Handle WebRTC signaling for video/audio calls
   socket.on("offer", (data) => {
     const { to, offer } = data;
-    console.log("offer recived be", to, offer);
+    // console.log("offer recived be", to, offer);
     
     // const receiverSocketId = users[to];
     // if (receiverSocketId) {
     //   io.to(receiverSocketId).emit("offer", { from: socket.id, offer });
     // }
+    console.log("users[to]", users[to]);
+    
     if (users[to]) {
       io.to(users[to]).emit("offer", { from: socket.id, offer });
     }
@@ -72,9 +74,11 @@ io.on("connection", (socket) => {
 
   socket.on("answer", (data) => {
     const { to, answer } = data;
-    console.log("to, answer", to, answer);
+    // console.log("to, answer", to, answer);
     
     const receiverSocketId = users[to];
+    console.log("receiverSocketId on offer", receiverSocketId);
+    
     if (receiverSocketId) {
       io.to(receiverSocketId).emit("answer", { from: socket.id, answer });
     }
@@ -88,16 +92,6 @@ io.on("connection", (socket) => {
     }
   });
 
-  // Notify when a user disconnects
-  // socket.on("disconnect", () => {
-  //   console.log(`User disconnected: ${socket.id}`);
-  //   for (const [userId, socketId] of Object.entries(users)) {
-  //     if (socketId === socket.id) {
-  //       delete users[userId];
-  //       break;
-  //     }
-  //   }
-  // });
 
   socket.on("disconnect", () => {
     console.log(`User disconnected: ${socket.id}`);
@@ -111,9 +105,5 @@ io.on("connection", (socket) => {
 
 });
 
-  // socket.on("disconnect", () => {
-  //   console.log(`User disconnected: ${socket.id}`);
-  // });
-// });
 
 server.listen(PORT, () => console.log(`Conversify server is running on port ${PORT}`));
