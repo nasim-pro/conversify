@@ -16,9 +16,20 @@ const SignUp = () => {
         });
     };
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        console.log("Form Submitted", formData);
+        const response = await fetch("http://localhost:2025/api/user/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ ...formData }),
+        });
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+            router.push("/login");
+        }
     };
 
     return (
