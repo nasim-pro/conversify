@@ -8,7 +8,7 @@ import { connectToDb } from "./db-config/db.config.ts";
 import { Message } from "./message/message.schema.ts";
 
 connectToDb();
-const users = {};
+const users = {} as any;
 const PORT = process.env.PORT || 2025;
 const app = express();
 const server = createServer(app);
@@ -33,6 +33,10 @@ app.use((req: Request, res: Response, next: () => void) => {
 });
 
 app.use(express.json());
+
+app.get('/', (_req: Request, res: Response) => {
+  return res.status(200).send({ success: true, backendStatus: 'Running' })
+})
 app.use("/api", allRoute);
 
 io.on("connection", (socket) => {
