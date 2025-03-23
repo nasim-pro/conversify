@@ -22,6 +22,7 @@ const UserList = ({ onSelectUser }: Props) => {
     useEffect(() => {
         const fetchUsers = async () => {
             try {
+                const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
                 const token = localStorage.getItem("token");
                 const loggedInUser = JSON.parse(localStorage.getItem("user") || '{}');
 
@@ -29,7 +30,7 @@ const UserList = ({ onSelectUser }: Props) => {
                     throw new Error("Invalid user or token");
                 }
 
-                const response = await axios.get("http://localhost:2025/api/user", {
+                const response = await axios.get(`${apiBaseUrl}/api/user`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
