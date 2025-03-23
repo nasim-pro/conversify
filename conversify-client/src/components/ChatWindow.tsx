@@ -26,9 +26,10 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ currentUser, selectedUser }) =>
 
     const fetchChatHistory = async () => {
         try {
+            const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
             const token = localStorage.getItem("token"); // Retrieve token from localStorage
             const response = await axios.get(
-                `http://localhost:2025/api/message/history?currentUserId=${currentUser._id}&selectedUserId=${selectedUser._id}`,
+                `${apiBaseUrl}/api/message/history?currentUserId=${currentUser._id}&selectedUserId=${selectedUser._id}`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
