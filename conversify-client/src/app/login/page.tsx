@@ -15,7 +15,8 @@ const Login = () => {
         setError(null);
 
         try {
-            const response = await fetch("http://localhost:2025/api/user/login", {
+            const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
+            const response = await fetch(`${apiBaseUrl}/api/user/login`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
