@@ -18,7 +18,8 @@ const SignUp = () => {
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        const response = await fetch("http://localhost:2025/api/user/", {
+        const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
+        const response = await fetch(`${apiBaseUrl}/api/user/`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
